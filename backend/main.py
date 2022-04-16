@@ -38,7 +38,7 @@ async def client_create(payload: schemas.ClientCreate, db: Session = Depends(get
         raise HTTPException(status_code=400, detail="Email already registered")
     return crud.create_client(db=db, content=payload)
 
-@app.post('/api/v1/client/read', response_model=schemas.Client|list[schemas.Client]|list)
+@app.post('/api/v1/client/read', response_model=list[schemas.Client]|list)
 async def client_read(payload: schemas.ClientRead, db: Session = Depends(get_db)):
         return crud.read_client(db=db, by=payload.by, parameter=payload.parameter)
 
