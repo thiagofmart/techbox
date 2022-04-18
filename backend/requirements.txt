@@ -1,8 +1,0 @@
-fastapi
-jinja2
-SQLAlchemy
-uvicorn[standard]
-mysqlclient
-pymysql
-sqlalchemy-utils
-pydantic[Email]
