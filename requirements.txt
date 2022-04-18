@@ -1,0 +1,8 @@
+fastapi
+SQLAlchemy
+uvicorn[standard]
+sqlalchemy-utils
+pydantic[Email]
+fastapi-sessions
+pyjwt
+python-multipart
