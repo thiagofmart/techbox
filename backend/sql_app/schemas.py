@@ -2,14 +2,10 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr, SecretStr
 from typing import Optional
 
-class Address(BaseModel):
-    id: int
-    desc: str
-    client_id: int
-    class Config:
-        orm_mode=True
+
 ################################################################################
-# Métodos
+##### METHODS
+# Client
 class ClientBase(BaseModel):
     email: EmailStr
     first_name: str
@@ -37,6 +33,29 @@ class ClientDelete(BaseModel):
 class Client(ClientBase):
     id: int
 
+    class Config:
+        orm_mode=True
+
+# Address
+
+class AddressBase(BaseModel):
+    postal_code: str
+    street: str
+    district: str
+    city: str
+    state: str
+
+class AddressCreate(AddressBase):
+    number: str
+    complement: str | None = None
+    tag: str
+    client_id: int
+
+class Address(AddressBase):
+    id: int
+    number: str
+    complement: str | None = None
+    tag: str
     class Config:
         orm_mode=True
 

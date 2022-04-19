@@ -6,3 +6,4 @@ pydantic[Email]
 fastapi-sessions
 pyjwt
 python-multipart
+pycep-correios

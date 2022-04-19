@@ -30,8 +30,15 @@ class Client(Base):
 
 class Address(Base):
     __tablename__ = 'address'
-    id = Column(Integer, primary_key=True)
-    desc = Column(String)
+    id = Column(Integer, primary_key=True, index=True)
+    postal_code = Column(String[8])
+    street = Column(String)
+    number = Column(String)
+    complement = Column(String, nullable=True)
+    district = Column(String)
+    city = Column(String)
+    state = Column(String)
+    tag = Column(String) #entrega ou cobranca
     client_id = Column(Integer, ForeignKey('client.id'))
 
 

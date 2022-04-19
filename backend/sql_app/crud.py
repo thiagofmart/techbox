@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import update
 from . import models, schemas, tools
+import json
 
 
 ################################################################################
 # CREATE
-
 async def create_client(db: Session, content: schemas.ClientCreate):
     hashed_password = tools.encrypt_pass(content.password)
     db_client = models.Client(first_name=content.first_name, last_name=content.last_name, email=content.email, birth_date=content.birth_date, hashed_password=hashed_password)
@@ -14,6 +14,12 @@ async def create_client(db: Session, content: schemas.ClientCreate):
     db.refresh(db_client)
     return db_client
 
+async def create_address(db: Session, content: schemas.AddressCreate):
+    db_address = models.Address(postal_code=content.postal_code, street=content.street, number=content.number, complement=content.complement, district=content.district, city=content.city, state=content.state, tag=content.tag, client_id=content.client_id)
+    db.add(db_address)
+    db.commit()
+    db.refresh(db_address)
+    return db_address
 ################################################################################
 # READ
 async def read_client(db: Session, by: str, parameter: str|int|float):
@@ -31,7 +37,7 @@ async def read_client(db: Session, by: str, parameter: str|int|float):
 
 async def get_client_by_email(db: Session, email: str):
     return db.query(models.Client).filter(models.Client.email==email).first()
-async def get_client_by_id(db: Session, id: int):
+def get_client_by_id(db: Session, id: int):
     return db.query(models.Client).filter(models.Client.id==id).first()
 
 ################################################################################
@@ -45,7 +51,6 @@ async def update_client(db: Session, content: schemas.ClientUpdate):
     db_client = db.query(models.Client).filter(models.Client.id==content.id).update(content_dict, synchronize_session=False)
     db.commit()
     return db_client #db_client
-
 
 ################################################################################
 # DELETE
