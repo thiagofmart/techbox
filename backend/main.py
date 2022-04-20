@@ -26,16 +26,17 @@ async def client_create(payload: schemas.ClientCreate, db: Session = Depends(too
 async def client_read(payload: schemas.ClientRead, db: Session = Depends(tools.get_db)):
     return await crud.read_client(db=db, by=payload.by, parameter=payload.parameter)
 
-@app.post('/api/v1/client/update', response_model=schemas.Client|list[schemas.Client]|list)
+@app.post('/api/v1/client/update', response_model=schemas.Client)
 async def client_update(payload: schemas.ClientUpdate, db: Session = Depends(tools.get_db)):
     db_client = crud.get_client_by_id(db=db, id=payload.id)
     if not db_client:
         raise HTTPException(status_code=400, detail=f"Client with ID: {payload.id} isn't registered")
     if not tools.verify_password(payload.confirming_password, db_client):
         raise HTTPException(status_code=400, detail=f"Wrong confirming password")
-    return await crud.update_client(db=db, content=payload)
+    _ = await crud.update_client(db=db, content=payload)
+    return db_client
 
-@app.post('/api/v1/client/delete', response_model=schemas.Client|list[schemas.Client]|list)
+@app.post('/api/v1/client/delete', response_model=list)
 async def client_delete(payload: schemas.ClientDelete, db: Session = Depends(tools.get_db)):
     db_client = crud.get_client_by_id(db=db, id=payload.id)
     if not db_client:
@@ -68,7 +69,27 @@ async def consult_postal_code(postal_code: str):
 
 @app.post('/api/v1/address/create', response_model=schemas.Address)
 async def address_create(payload: schemas.AddressCreate, db: Session = Depends(tools.get_db)):
+    endereco = await utils.get_postal_code(payload.postal_code)
     cliend_db = crud.get_client_by_id(db=db, id=payload.client_id)
     if not cliend_db:
         raise HTTPException(status_code=400, detail=f'ID {payload.client_id} de cliente inexistente')
     return await crud.create_address(db=db, content=payload)
+
+@app.post('/api/v1/address/read', response_model=list)
+async def address_read(payload: schemas.AddressRead, db: Session = Depends(tools.get_db)):
+    return await crud.read_address(db=db, by=payload.by, parameter=payload.parameter)
+
+@app.post('/api/v1/address/update', response_model=schemas.Address)
+async def address_update(payload: schemas.AddressUpdate, db: Session = Depends(tools.get_db)):
+    db_address = crud.get_address_by_id(db=db, id=payload.id)
+    if not db_address:
+        raise HTTPException(status_code=400, detail=f"Address with ID: {payload.id} isn't registered")
+    _ = await crud.update_address(db=db, content=payload)
+    return db_address
+
+@app.post('/api/v1/address/delete', response_model=list)
+async def address_delete(payload: schemas.AddressDelete, db: Session = Depends(tools.get_db)):
+    db_address = crud.get_address_by_id(db=db, id=payload.id)
+    if not db_address:
+        raise HTTPException(status_code=400, detail=f"Address with ID: {payload.id} isn't registered")
+    return await crud.delete_address(db=db, content=payload)

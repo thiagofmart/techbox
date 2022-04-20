@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from pydantic import BaseModel, EmailStr, SecretStr
 from typing import Optional
 
@@ -16,13 +16,13 @@ class ClientCreate(ClientBase):
     password: str
 class ClientRead(BaseModel):
     by: str
-    parameter: str | int | float
+    parameter: str | int | float | date
 class ClientUpdate(ClientBase):
     id: int
     email: Optional[EmailStr]
     first_name: Optional[str]
     last_name: Optional[str]
-    birth_date: Optional[datetime]
+    birth_date: Optional[date]
     password: Optional[str]
     last_updated: datetime = datetime.now()
     confirming_password: str
@@ -50,12 +50,29 @@ class AddressCreate(AddressBase):
     complement: str | None = None
     tag: str
     client_id: int
+class AddressRead(BaseModel):
+    by: str
+    parameter:  str | int | float
+class AddressUpdate(AddressBase):
+    id: int
+    postal_code: Optional[str]
+    street: Optional[str]
+    district: Optional[str]
+    city: Optional[str]
+    state: Optional[str]
+    number: Optional[str]
+    complement: Optional[str]
+    tag: Optional[str]
+    
+class AddressDelete(BaseModel):
+    id: int
 
 class Address(AddressBase):
     id: int
     number: str
     complement: str | None = None
     tag: str
+    client_id: int
     class Config:
         orm_mode=True
 

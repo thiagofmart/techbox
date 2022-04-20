@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime, Date
 from sqlalchemy_utils import EmailType
 from sqlalchemy.orm import relationship
 from .database import Base, engine
@@ -20,7 +20,7 @@ class Client(Base):
     email = Column(EmailType, unique=True)
     first_name = Column(String)
     last_name = Column(String)
-    birth_date = Column(DateTime)
+    birth_date = Column(Date)
     hashed_password = Column(String)
     created = Column(DateTime, default=datetime.now)
     last_updated = Column(DateTime, default=datetime.now)

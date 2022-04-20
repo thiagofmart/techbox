@@ -43,7 +43,7 @@ async def get_current_client(token: str = Depends(oauth2schema), db: Session=Dep
 async def get_postal_code(postal_code: str):
     try:
         endereco = pycep_correios.get_address_from_cep(postal_code)
-    except pycep_correios.exceptions.InvalidCEP:
+    except (pycep_correios.exceptions.InvalidCEP, pycep_correios.exceptions.BaseException):
         raise HTTPException(status_code=400, detail='CEP Inválido')
     except pycep_correios.exceptions.CEPNotFound:
         raise HTTPException(status_code=400, detail='CEP não encontrado')
