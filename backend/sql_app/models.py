@@ -14,18 +14,18 @@ class Planos(Base):
     s_value = Column(Float)
     y_value = Column(Float)
 
-class Client(Base):
-    __tablename__ = 'client'
+
+class User(Base):
+    __tablename__ = 'user'
     id = Column(Integer, primary_key=True, index=True)
     email = Column(EmailType, unique=True)
-    first_name = Column(String)
-    last_name = Column(String)
-    birth_date = Column(Date)
+    name = Column(String)
+    tag = Column(String)
     hashed_password = Column(String)
     created = Column(DateTime, default=datetime.now)
     last_updated = Column(DateTime, default=datetime.now)
     adressess = relationship('Address', backref='address', cascade="all, delete-orphan")
-
+    credit_cards = relationship('CreditCard', backref='creditcard', cascade="all, delete-orphan")
 
 
 class Address(Base):
@@ -39,9 +39,15 @@ class Address(Base):
     city = Column(String)
     state = Column(String)
     tag = Column(String) #entrega ou cobranca
-    client_id = Column(Integer, ForeignKey('client.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
 
 
-database = {
-'planos':['padrão',],
-}
+class CreditCard(Base):
+    __tablename__ = 'creditcard'
+    id = Column(Integer, primary_key=True, nullable=False, index=True)
+    holder = Column(String)
+    cardnumber = Column(String)
+    expirationdate = Column(String)
+    securitycode = Column(String)
+
+    user_id = Column(Integer, ForeignKey('user.id'))

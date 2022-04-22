@@ -5,33 +5,31 @@ from typing import Optional
 
 ################################################################################
 ##### METHODS
-# Client
-class ClientBase(BaseModel):
+# User
+class UserBase(BaseModel):
     email: EmailStr
-    first_name: str
-    last_name: str
-    birth_date: datetime
+    name: str
 
-class ClientCreate(ClientBase):
+class UserCreate(UserBase):
     password: str
-class ClientRead(BaseModel):
+    tag: str
+class UserRead(BaseModel):
     by: str
     parameter: str | int | float | date
-class ClientUpdate(ClientBase):
+class UserUpdate(UserBase):
     id: int
     email: Optional[EmailStr]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    birth_date: Optional[date]
+    name: Optional[str]
     password: Optional[str]
-    last_updated: datetime = datetime.now()
+    tag: Optional[str]
     confirming_password: str
-class ClientDelete(BaseModel):
+class UserDelete(BaseModel):
     id: int
     confirming_password: str
 
-class Client(ClientBase):
+class User(UserBase):
     id: int
+    tag: str
 
     class Config:
         orm_mode=True
@@ -49,7 +47,7 @@ class AddressCreate(AddressBase):
     number: str
     complement: str | None = None
     tag: str
-    client_id: int
+    user_id: int
 class AddressRead(BaseModel):
     by: str
     parameter:  str | int | float
@@ -63,7 +61,7 @@ class AddressUpdate(AddressBase):
     number: Optional[str]
     complement: Optional[str]
     tag: Optional[str]
-    
+
 class AddressDelete(BaseModel):
     id: int
 
@@ -72,7 +70,34 @@ class Address(AddressBase):
     number: str
     complement: str | None = None
     tag: str
-    client_id: int
+    user_id: int
+    class Config:
+        orm_mode=True
+
+# Crédit Card
+class CreditCardBase(BaseModel):
+    holder: str
+    cardnumber: str
+    expirationdate: str
+    securitycode: str
+
+class CreditCardCreate(CreditCardBase):
+    user_id: int
+class CreditCardRead(BaseModel):
+    by: str
+    parameter: str|int|float
+class CreditCardUpdate(CreditCardBase):
+    id: int
+    holder: Optional[str]
+    cardnumber: Optional[str]
+    expirationdate: Optional[str] # MM/YYYY
+    securitycode: Optional[str]
+class CreditCardDelete(BaseModel):
+    id: str
+
+class CreditCard(CreditCardBase):
+    id: int
+
     class Config:
         orm_mode=True
 

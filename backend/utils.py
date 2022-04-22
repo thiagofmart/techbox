@@ -10,7 +10,7 @@ import pycep_correios
 
 
 JWT_SECRET = 'MYJWTSECRET'
-oauth2schema = OAuth2PasswordBearer(tokenUrl='/api/v1/client/generate-token')
+oauth2schema = OAuth2PasswordBearer(tokenUrl='/api/v1/user/generate-token')
 def _config_CORS(app):
 
     origins = [
@@ -19,26 +19,26 @@ def _config_CORS(app):
     ]
     app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-async def authenticate_client(email: str, password: str, db: Session = Depends(tools.get_db)):
-    db_client = await crud.get_client_by_email(db=db, email=email)
-    if not db_client:
+async def authenticate_user(email: str, password: str, db: Session = Depends(tools.get_db)):
+    db_user = await crud.get_user_by_email(db=db, email=email)
+    if not db_user:
         return False
-    if not tools.verify_password(password, db_client):
+    if not tools.verify_password(password, db_user):
         return False
-    return db_client
+    return db_user
 
-async def create_token(client: models.Client):
-    client_obj = schemas.Client.from_orm(client)
-    token = jwt.encode(json.loads(client_obj.json()), JWT_SECRET)
+async def create_token(user: models.User):
+    user_obj = schemas.User.from_orm(user)
+    token = jwt.encode(json.loads(user_obj.json()), JWT_SECRET)
     return dict(access_token=token, token_type='bearer')
 
-async def get_current_client(token: str = Depends(oauth2schema), db: Session=Depends(tools.get_db)):
+async def get_current_user(token: str = Depends(oauth2schema), db: Session=Depends(tools.get_db)):
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
-        client = db.query(models.Client).get(payload['id'])#await crud.get_client_by_id(db=db, id=int(ayload['id']))
+        user = db.query(models.User).get(payload['id'])#await crud.get_user_by_id(db=db, id=int(ayload['id']))
     except:
         raise HTTPException(status_code=401, detail=f"Invalid Email or Password")
-    return schemas.Client.from_orm(client)
+    return schemas.User.from_orm(user)
 
 async def get_postal_code(postal_code: str):
     try:

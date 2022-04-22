@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime, date
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import update
 from . import models, schemas, tools
@@ -7,34 +7,37 @@ import json
 
 ################################################################################
 # CREATE
-async def create_client(db: Session, content: schemas.ClientCreate):
+async def create_user(db: Session, content: schemas.UserCreate):
     hashed_password = tools.encrypt_pass(content.password)
-    db_client = models.Client(first_name=content.first_name, last_name=content.last_name, email=content.email, birth_date=content.birth_date, hashed_password=hashed_password)
-    db.add(db_client)
+    db_user = models.User(name=content.name, email=content.email, tag=content.tag, hashed_password=hashed_password)
+    db.add(db_user)
     db.commit()
-    db.refresh(db_client)
-    return db_client
-
+    db.refresh(db_user)
+    return db_user
 async def create_address(db: Session, content: schemas.AddressCreate):
-    db_address = models.Address(postal_code=content.postal_code, street=content.street, number=content.number, complement=content.complement, district=content.district, city=content.city, state=content.state, tag=content.tag, client_id=content.client_id)
+    db_address = models.Address(postal_code=content.postal_code, street=content.street, number=content.number, complement=content.complement, district=content.district, city=content.city, state=content.state, tag=content.tag, user_id=content.user_id)
     db.add(db_address)
     db.commit()
     db.refresh(db_address)
     return db_address
+async def create_credit_card(db: Session, content: schemas.CreditCardCreate):
+    db_credit_card = models.CreditCard(holder=content.holder, cardnumber=content.cardnumber, expirationdate=content.expirationdate, securitycode=content.securitycode, user_id=content.user_id)
+    db.add(db_credit_card)
+    db.commit()
+    db.refresh(db_credit_card)
+    return db_credit_card
 ################################################################################
 # READ
-async def read_client(db: Session, by: str, parameter: str|int|float|date):
+async def read_user(db: Session, by: str, parameter: str|int|float|date):
     match by:
         case 'id':
-            return db.query(models.Client).filter(models.Client.id==parameter).all()
+            return db.query(models.User).filter(models.User.id==parameter).all()
         case 'email':
-            return db.query(models.Client).filter(models.Client.email==parameter).all()
-        case 'first_name':
-            return db.query(models.Client).filter(models.Client.first_name==parameter).all()
-        case 'last_name':
-            return db.query(models.Client).filter(models.Client.last_name==parameter).all()
-        case 'birth_date':
-            return db.query(models.Client).filter(models.Client.birth_date==parameter).all()
+            return db.query(models.User).filter(models.User.email==parameter).all()
+        case 'name':
+            return db.query(models.User).filter(models.User.name==parameter).all()
+        case 'tag':
+            return db.query(models.User).filter(models.User.tag==parameter).all()
         case _:
             return []
 async def read_address(db: Session, by: str, parameter: str|int|float|date):
@@ -57,44 +60,72 @@ async def read_address(db: Session, by: str, parameter: str|int|float|date):
             return db.query(models.Address).filter(models.Address.state==parameter).all()
         case 'tag':
             return db.query(models.Address).filter(models.Address.tag==parameter).all()
-        case 'client_id':
-            return db.query(models.Address).filter(models.Address.client_id==parameter).all()
+        case 'user_id':
+            return db.query(models.Address).filter(models.Address.user_id==parameter).all()
+        case _:
+            return []
+async def read_credit_card(db: Session, by: str, parameter: str|int|float|date):
+    match by:
+        case 'holder':
+            return db.query(models.CreditCard).filter(models.CreditCard.holder==parameter).all()
+        case 'cardnumber':
+            return db.query(models.CreditCard).filter(models.CreditCard.cardnumber==parameter).all()
+        case 'expirationdate':
+            return db.query(models.CreditCard).filter(models.CreditCard.expirationdate==parameter).all()
+        case 'securitycode':
+            return db.query(models.CreditCard).filter(models.CreditCard.securitycode==parameter).all()
         case _:
             return []
 
-async def get_client_by_email(db: Session, email: str):
-    return db.query(models.Client).filter(models.Client.email==email).first()
-def get_client_by_id(db: Session, id: int):
-    return db.query(models.Client).filter(models.Client.id==id).first()
+async def get_user_by_email(db: Session, email: str):
+    return db.query(models.User).filter(models.User.email==email).first()
+def get_user_by_id(db: Session, id: int):
+    return db.query(models.User).filter(models.User.id==id).first()
 def get_address_by_id(db: Session, id: int):
     return db.query(models.Address).filter(models.Address.id==id).first()
+def get_credit_card_by_id(db: Session, id: int):
+    return db.query(models.CreditCard).filter(models.CreditCard.id==id).first()
+
 
 ################################################################################
 # UPSERT
-async def update_client(db: Session, content: schemas.ClientUpdate):
+async def update_user(db: Session, content: schemas.UserUpdate):
     content_dict = content.dict()
     if content_dict['password']:
         content_dict['hashed_password'] = tools.encrypt_pass(content_dict['password'])
     del content_dict['confirming_password'], content_dict['id'], content_dict['password']
-
-    db_client = db.query(models.Client).filter(models.Client.id==content.id).update(content_dict, synchronize_session=False)
+    content_dict['last_updated'] = datetime.now()
+    content_dict = dict((k, v) for k, v in content_dict.items() if v is not None)
+    db_user = db.query(models.User).filter(models.User.id==content.id).update(content_dict, synchronize_session=False)
     db.commit()
-    return db_client
+    return db_user
 async def update_address(db: Session, content: schemas.AddressUpdate):
     content_dict = content.dict()
+    content_dict = dict((k, v) for k, v in content_dict.items() if v is not None)
     db_address = db.query(models.Address).filter(models.Address.id==content.id).update(content_dict, synchronize_session=False)
     db.commit()
     return db_address
+async def update_credit_card(db: Session, content: schemas.CreditCardUpdate):
+    content_dict = content.dict()
+    content_dict = dict((k, v) for k, v in content_dict.items() if v is not None)
+    db_credit_card = db.query(models.CreditCard).filter(models.CreditCard.id==content.id).update(content_dict, synchronize_session=False)
+    db.commit()
+    return db_credit_card
 
 ################################################################################
 # DELETE
-async def delete_client(db: Session, content: schemas.ClientDelete):
-    db_client = db.query(models.Client).filter(models.Client.id==content.id).first()
-    db.delete(db_client)
+async def delete_user(db: Session, content: schemas.UserDelete):
+    db_user = db.query(models.User).filter(models.User.id==content.id).first()
+    db.delete(db_user)
     db.commit()
     return []
 async def delete_address(db: Session, content: schemas.AddressDelete):
     db_address = db.query(models.Address).filter(models.Address.id==content.id).first()
     db.delete(db_address)
+    db.commit()
+    return []
+async def delete_credit_card(db: Session, content: schemas.CreditCardDelete):
+    db_credit_card = db.query(models.CreditCard).filter(models.CreditCard.id==content.id).first()
+    db.delete(db_credit_card)
     db.commit()
     return []
