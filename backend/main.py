@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, Response, Depends, HTTPException
 from fastapi.responses import HTMLResponse
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sql_app.database import Session
 from sql_app import models, crud, schemas, tools
 import utils
@@ -58,6 +58,10 @@ async def generate_token(form_data: OAuth2PasswordRequestForm = Depends(), db: S
 @app.post('/api/v1/user/validate-token', response_model=schemas.User)
 async def get_user(user: schemas.User = Depends(utils.get_current_user)):
     return user
+
+@app.get('/api/v1/get_current_user', response_model=schemas.User)
+async def read_items(token: str = Depends(utils.oauth2schema), db: Session=Depends(tools.get_db)):
+    return utils.get_current_user(token=token, db=db)
 
 ################################################################################
 # ADDRESS
