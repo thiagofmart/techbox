@@ -7,3 +7,5 @@ fastapi-sessions
 pyjwt
 python-multipart
 pycep-correios
+pandas
+openpyxl

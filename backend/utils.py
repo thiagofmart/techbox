@@ -6,7 +6,9 @@ from sql_app.database import Session
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sql_app.database import Session
 import pycep_correios
+import pandas as pd
 
 
 JWT_SECRET = 'MYJWTSECRET'
@@ -27,7 +29,7 @@ async def authenticate_user(email: str, password: str, db: Session = Depends(too
         return False
     return db_user
 
-async def create_token(user: models.User):
+async def create_token(user: models.Users):
     user_obj = schemas.User.from_orm(user)
     token = jwt.encode(json.loads(user_obj.json()), JWT_SECRET)
     return dict(access_token=token, token_type='bearer')
@@ -35,7 +37,7 @@ async def create_token(user: models.User):
 async def get_current_user(token: str = Depends(oauth2schema), db: Session=Depends(tools.get_db)):
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
-        user = db.query(models.User).get(payload['id'])#await crud.get_user_by_id(db=db, id=int(ayload['id']))
+        user = db.query(models.Users).get(payload['id'])#await crud.get_user_by_id(db=db, id=int(ayload['id']))
     except:
         raise HTTPException(status_code=401, detail=f"Invalid Email or Password")
     return schemas.User.from_orm(user)
@@ -48,3 +50,13 @@ async def get_postal_code(postal_code: str):
     except pycep_correios.exceptions.CEPNotFound:
         raise HTTPException(status_code=400, detail='CEP não encontrado')
     return endereco
+
+def insert_plans(db):
+    df = pd.read_excel('./Tabela_de_Precos.xlsx', sheet_name='Planos')
+    for row in df.iterrows():
+        d = row[1]
+        plan = models.Plans(desc=d['DESCRIÇÃO'], m_value=d['MENSAL+Frete'], t_value=d['TRIMESTRAL+Frete'], s_value=d['SEMESTRAL+Frete'], y_value=d['ANUAL+Frete'])
+        db.add(plan)
+        db.commit()
+        db.refresh(plan)
+    return

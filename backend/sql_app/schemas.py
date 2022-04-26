@@ -9,10 +9,10 @@ from typing import Optional
 class UserBase(BaseModel):
     email: EmailStr
     name: str
+    tag: str
 
 class UserCreate(UserBase):
     password: str
-    tag: str
 class UserRead(BaseModel):
     by: str
     parameter: str | int | float | date
@@ -22,6 +22,7 @@ class UserUpdate(UserBase):
     name: Optional[str]
     password: Optional[str]
     tag: Optional[str]
+    status: Optional[bool]
     confirming_password: str
 class UserDelete(BaseModel):
     id: int
@@ -29,7 +30,8 @@ class UserDelete(BaseModel):
 
 class User(UserBase):
     id: int
-    tag: str
+    status: bool
+
 
     class Config:
         orm_mode=True
@@ -100,6 +102,49 @@ class CreditCard(CreditCardBase):
 
     class Config:
         orm_mode=True
+
+# Plans
+class PlanBase(BaseModel):
+    desc: str
+    m_value: str
+    t_value: str
+    s_value: str
+    y_value: str
+
+class PlanCreate(PlanBase):
+    pass
+class PlanRead(BaseModel):
+    by: str
+    parameter: str|int|float
+class PlanUpdate(PlanBase):
+    id: int
+    desc: Optional[str]
+    m_value: Optional[str]
+    t_value: Optional[str]
+    s_value: Optional[str]
+    y_value: Optional[str]
+class PlanDelete(BaseModel):
+    id: int
+
+class Plan(PlanBase):
+    id: int
+
+    class Config:
+        orm_mode=True
+
+# Contracts
+
+class ContractBase(BaseModel):
+    freight: str
+    user_id: int
+    creditcard_id: int
+    plan_id: int
+    address_id: int
+
+class ContractCreate(ContractBase):
+    pass
+
+
 
 ################################################################################
 

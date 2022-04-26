@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Request, Response, Depends, HTTPException
 from fastapi.responses import HTMLResponse
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordRequestForm
 from sql_app.database import Session
-from sql_app import models, crud, schemas, tools
+from sql_app import crud, schemas, tools
 import utils
 
 
@@ -10,6 +10,8 @@ app = FastAPI()
 tools._create_database()    #URL where token is generated
 utils._config_CORS(app=app)
 
+#db = Session()
+#utils.insert_plans(db)
 
 @app.get('/', response_class=HTMLResponse)
 async def homepage():
@@ -59,9 +61,9 @@ async def generate_token(form_data: OAuth2PasswordRequestForm = Depends(), db: S
 async def get_user(user: schemas.User = Depends(utils.get_current_user)):
     return user
 
-@app.get('/api/v1/get_current_user', response_model=schemas.User)
+@app.get('/api/v1/user/current_user', response_model=schemas.User)
 async def read_items(token: str = Depends(utils.oauth2schema), db: Session=Depends(tools.get_db)):
-    return utils.get_current_user(token=token, db=db)
+    return await utils.get_current_user(token=token, db=db)
 
 ################################################################################
 # ADDRESS
