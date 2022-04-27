@@ -9,8 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from sql_app.database import Session
 import pycep_correios
 import pandas as pd
+from loguru import logger
 
-
+logger.level('EMAIL', no=19)
+logger.add("./logs/emails.log", level='EMAIL', rotation='monthly', format='[{time}: {level}] - {message}')
 JWT_SECRET = 'MYJWTSECRET'
 oauth2schema = OAuth2PasswordBearer(tokenUrl='/api/v1/user/generate-token')
 def _config_CORS(app):

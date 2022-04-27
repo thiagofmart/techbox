@@ -19,6 +19,7 @@ class Users(Base):
     adressess = relationship('Addressess', backref='users', cascade="all, delete-orphan")
     credit_cards = relationship('CreditCards', backref='users', cascade="all, delete-orphan")
     contracts = relationship('Contracts', backref='users')
+    emails = relationship('Emails', backref='users')
 
 class Addressess(Base):
     __tablename__ = 'addressess'
@@ -34,8 +35,6 @@ class Addressess(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now)
-
-    contracts = relationship('Contracts', backref='addressess')
 
 class CreditCards(Base):
     __tablename__ = 'creditcards'
@@ -56,16 +55,21 @@ class Plans(Base):
     t_value = Column(Float)
     s_value = Column(Float)
     y_value = Column(Float)
+    created_at = Column(DateTime, default=datetime.now)
 
     contracts = relationship('Contracts', backref='plans')
 
 class Contracts(Base):
     __tablename__ = 'contracts'
     id = Column(Integer, primary_key=True, index=True)
-    freight = Column(Float)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    creditcard_id = Column(Integer, ForeignKey('creditcards.id'))
-    plan_id = Column(Integer, ForeignKey('plans.id'))
-    address_id = Column(Integer, ForeignKey('addressess.id'))
-    confirming_email_id = Column(Integer)
-    created_at = Column(DateTime, default=datetime.now)
+    confirming_email_id = Column(Integer, nullable=False)
+    freight = Column(Float, nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    creditcard_id = Column(Integer, ForeignKey('creditcards.id'), nullable=False)
+    plan_id = Column(Integer, ForeignKey('plans.id'), nullable=False)
+    delivery_address_id = Column(Integer, ForeignKey('addressess.id'), nullable=False)
+    billing_address_id = Column(Integer, ForeignKey('addressess.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+
+    delivery_address = relationship("Addressess", foreign_keys=[delivery_address_id])
+    billing_address = relationship("Addressess", foreign_keys=[billing_address_id])

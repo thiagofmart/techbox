@@ -9,3 +9,5 @@ python-multipart
 pycep-correios
 pandas
 openpyxl
+slowapi
+loguru

@@ -117,7 +117,7 @@ class PlanRead(BaseModel):
     by: str
     parameter: str|int|float
 class PlanUpdate(PlanBase):
-    id: int
+    id: int|float
     desc: Optional[str]
     m_value: Optional[str]
     t_value: Optional[str]
@@ -128,7 +128,7 @@ class PlanDelete(BaseModel):
 
 class Plan(PlanBase):
     id: int
-
+    created_at: datetime
     class Config:
         orm_mode=True
 
@@ -136,16 +136,33 @@ class Plan(PlanBase):
 
 class ContractBase(BaseModel):
     freight: str
-    user_id: int
-    creditcard_id: int
-    plan_id: int
-    address_id: int
+    user_id: int|float
+    creditcard_id: int|float
+    plan_id: int|float
+    delivery_address_id: int|float
+    billing_address_id: int|float
 
 class ContractCreate(ContractBase):
+    confirming_email_id: int
+class ContractRead(BaseModel):
+    by: str
+    parameter: str|int|float
+class ContractDelete(BaseModel):
+    id: int
+
+class Contract(PlanBase):
+    id: int
+
+    class Config:
+        orm_mode=True
+
+# Emails
+
+class EmailBase(BaseModel):
+    type: str
+
+class EmailCreate(BaseModel):
     pass
-
-
-
 ################################################################################
 
 class SessionData(BaseModel):
