@@ -34,10 +34,12 @@ async def create_plan(db: Session, content: schemas.PlanCreate):
 async def create_contract(db: Session, content: schemas.PlanCreate):
     db_contract = models.Contracts(confirming_email_id=content.confirming_email_id,
                         freight=content.freight, user_id=content.user_id, creditcard_id=content.creditcard_id,
-                        plan_id=content.plan_id, address_id=content.address_id)
+                        plan_id=content.plan_id, delivery_address_id=content.delivery_address_id,
+                        billing_address_id=content.billing_address_id)
     db.add(db_contract)
     db.commit()
     db.refresh(db_contract)
+    return db_contract
 async def create_email(db: Session, content: schemas.EmailCreate):
     db_email = models.Emails(type=content.type, user_id=content.user_id)
     db.add(db_email)
@@ -94,6 +96,8 @@ async def read_credit_card(db: Session, by: str, parameter: str|int|float|date):
             return db.query(models.CreditCards).filter(models.CreditCards.expirationdate==parameter).all()
         case 'securitycode':
             return db.query(models.CreditCards).filter(models.CreditCards.securitycode==parameter).all()
+        case 'user_id':
+            return db.query(models.CreditCards).filter(models.CreditCards.user_id==parameter).all()
         case _:
             return []
 async def read_plan(db: Session, by: str, parameter: str|int|float):
@@ -106,6 +110,20 @@ async def read_plan(db: Session, by: str, parameter: str|int|float):
             return db.query(models.Plans).filter(models.Plans.s_value==parameter).all()
         case 'y_value':
             return db.query(models.Plans).filter(models.Plans.y_value==parameter).all()
+        case _:
+            return []
+async def read_contract(db: Session, by: str, parameter: str|int|float):
+    match by:
+        case 'user_id':
+            return db.query(models.Contracts).filter(models.Contracts.user_id==parameter).all()
+        case 'creditcard':
+            return db.query(models.Contracts).filter(models.Contracts.creditcard==parameter).all()
+        case 'plan_id':
+            return db.query(models.Contracts).filter(models.Contracts.plan_id==parameter).all()
+        case 'delivery_address':
+            return db.query(models.Contracts).filter(models.Contracts.delivery_address==parameter).all()
+        case 'billing_address':
+            return db.query(models.Contracts).filter(models.Contracts.billing_address==parameter).all()
         case _:
             return []
 
@@ -126,7 +144,7 @@ async def update_user(db: Session, content: schemas.UserUpdate):
     if content_dict['password']:
         content_dict['hashed_password'] = tools.encrypt_pass(content_dict['password'])
     del content_dict['confirming_password'], content_dict['id'], content_dict['password']
-    content_dict['last_updated'] = datetime.now()
+    content_dict['updated_at'] = datetime.now()
     content_dict = dict((k, v) for k, v in content_dict.items() if v is not None)
     db_user = db.query(models.Users).filter(models.Users.id==content.id).update(content_dict, synchronize_session=False)
     db.commit()
@@ -143,7 +161,7 @@ async def update_credit_card(db: Session, content: schemas.CreditCardUpdate):
     db_credit_card = db.query(models.CreditCards).filter(models.CreditCards.id==content.id).update(content_dict, synchronize_session=False)
     db.commit()
     return db_credit_card
-async def update_credit_card(db: Session, content: schemas.CreditCardUpdate):
+async def update_plan(db: Session, content: schemas.PlanUpdate):
     content_dict = content.dict()
     content_dict = dict((k, v) for k, v in content_dict.items() if v is not None)
     db_plan = db.query(models.Plan).filter(models.Plan.id==content.id).update(content_dict, synchronize_session=False)

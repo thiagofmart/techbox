@@ -44,6 +44,15 @@ class AddressBase(BaseModel):
     district: str
     city: str
     state: str
+class OptionalAddressBase(BaseModel):
+    postal_code: Optional[str]
+    street: Optional[str]
+    district: Optional[str]
+    city: Optional[str]
+    state: Optional[str]
+    number: Optional[str]
+    complement: Optional[str]
+
 
 class AddressCreate(AddressBase):
     number: str
@@ -53,17 +62,9 @@ class AddressCreate(AddressBase):
 class AddressRead(BaseModel):
     by: str
     parameter:  str | int | float
-class AddressUpdate(AddressBase):
+class AddressUpdate(OptionalAddressBase):
     id: int
-    postal_code: Optional[str]
-    street: Optional[str]
-    district: Optional[str]
-    city: Optional[str]
-    state: Optional[str]
-    number: Optional[str]
-    complement: Optional[str]
     tag: Optional[str]
-
 class AddressDelete(BaseModel):
     id: int
 
@@ -135,31 +136,33 @@ class Plan(PlanBase):
 # Contracts
 
 class ContractBase(BaseModel):
-    freight: str
+    freight: float|int
     user_id: int|float
-    creditcard_id: int|float
+    creditcard: CreditCardBase
     plan_id: int|float
-    delivery_address_id: int|float
-    billing_address_id: int|float
+    delivery_address: AddressBase
+    billing_address: AddressBase
 
 class ContractCreate(ContractBase):
     confirming_email_id: int
 class ContractRead(BaseModel):
     by: str
     parameter: str|int|float
-class ContractDelete(BaseModel):
+class ContractUpdate(ContractBase):
     id: int
+    delivery_address: Optional[AddressBase]
+    billing_address: Optional[AddressBase]
+    status: Optional[bool]
 
 class Contract(PlanBase):
     id: int
+    status: bool
 
     class Config:
         orm_mode=True
 
 # Emails
 
-class EmailBase(BaseModel):
-    type: str
 
 class EmailCreate(BaseModel):
     pass

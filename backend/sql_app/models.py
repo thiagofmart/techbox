@@ -1,8 +1,9 @@
 from datetime import datetime
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime, Date
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime, Date, PickleType
 from sqlalchemy_utils import EmailType
 from sqlalchemy.orm import relationship
 from .database import Base, engine
+from . import schemas
 
 
 class Users(Base):
@@ -19,7 +20,6 @@ class Users(Base):
     adressess = relationship('Addressess', backref='users', cascade="all, delete-orphan")
     credit_cards = relationship('CreditCards', backref='users', cascade="all, delete-orphan")
     contracts = relationship('Contracts', backref='users')
-    emails = relationship('Emails', backref='users')
 
 class Addressess(Base):
     __tablename__ = 'addressess'
@@ -45,7 +45,6 @@ class CreditCards(Base):
     securitycode = Column(String)
     user_id = Column(Integer, ForeignKey('users.id'))
 
-    contracts = relationship('Contracts', backref='contracts')
 
 class Plans(Base):
     __tablename__ = "plans"
@@ -65,11 +64,9 @@ class Contracts(Base):
     confirming_email_id = Column(Integer, nullable=False)
     freight = Column(Float, nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    creditcard_id = Column(Integer, ForeignKey('creditcards.id'), nullable=False)
+    creditcard = Column(PickleType, nullable=False)
     plan_id = Column(Integer, ForeignKey('plans.id'), nullable=False)
-    delivery_address_id = Column(Integer, ForeignKey('addressess.id'), nullable=False)
-    billing_address_id = Column(Integer, ForeignKey('addressess.id'), nullable=False)
+    delivery_address = Column(PickleType, nullable=False)
+    billing_address = Column(PickleType, nullable=False)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
-
-    delivery_address = relationship("Addressess", foreign_keys=[delivery_address_id])
-    billing_address = relationship("Addressess", foreign_keys=[billing_address_id])
+    status = Column(Boolean, default=True)

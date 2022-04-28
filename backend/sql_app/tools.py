@@ -19,6 +19,5 @@ def _create_database():
     Base.metadata.create_all(engine)
 def encrypt_pass(password):
     return pbkdf2_hmac('sha256', password.encode(), SALT, 500000).hex()
-
 def verify_password(password, db_client):
     return encrypt_pass(password)==db_client.hashed_password

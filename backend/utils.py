@@ -11,8 +11,7 @@ import pycep_correios
 import pandas as pd
 from loguru import logger
 
-logger.level('EMAIL', no=19)
-logger.add("./logs/emails.log", level='EMAIL', rotation='monthly', format='[{time}: {level}] - {message}')
+logger.add("./logs/logs.log", rotation='monthly', format='[{time}: {level}] - {message}')
 JWT_SECRET = 'MYJWTSECRET'
 oauth2schema = OAuth2PasswordBearer(tokenUrl='/api/v1/user/generate-token')
 def _config_CORS(app):
@@ -24,7 +23,7 @@ def _config_CORS(app):
     app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 async def authenticate_user(email: str, password: str, db: Session = Depends(tools.get_db)):
-    db_user = await crud.get_user_by_email(db=db, email=email)
+    db_user = crud.get_user_by_email(db=db, email=email)
     if not db_user:
         return False
     if not tools.verify_password(password, db_user):
