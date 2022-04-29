@@ -50,31 +50,34 @@ class Email():
         return message
 
     def send_email(self, message):
+
         context = ssl._create_unverified_context()
+        #context = ssl.create_default_context()
         with smtplib.SMTP(self.smtp_server, self.port) as server:
-            server.ehlo('Thiago Martins')
             server.starttls(context=context)
+            #server.ehlo('Thiago Martins')
             server.login(self.sender, self.password)
             server.sendmail(message['From'], message['To'].split(), message.as_string())
         return
 
-def TEST():
-    sender = input('Sender e-mail: ')
-    password = input('Password: ')
-    smtp_server = input('SMTP-Server: ')
-    receivers = ['thiago.martins@solarar.com.br', 'thiago.martins@solarar.com.br']
+def TEST_confirming_email(receivers):
+    sender = 'devloot2@gmail.com'
+    password = 'jw8mEBTM4ZuJ9gv'
+
+    smtp_server = 'smtp.gmail.com'
     subject = 'E-mail Subject test'
     body = """
 <html>
 <body>
 <h2>Prezado cliente,</h2><br>
 <br>
-<p>TESTE</p><br>
+<p>Segue código de verificação 456789</p><br>
+<p>email n°123</p><br>
 <br>
 Atenciosamente,<br>
 </body>
 </html>
 """
     e_mail = Email(smtp_server=smtp_server, sender=sender, password=password)
-    message = email.create_message(receivers, subject, body, path_files)
+    message = e_mail.create_message(receivers, subject, body)
     e_mail.send_email(message)

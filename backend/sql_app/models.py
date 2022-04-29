@@ -54,6 +54,7 @@ class Plans(Base):
     t_value = Column(Float)
     s_value = Column(Float)
     y_value = Column(Float)
+    status = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.now)
 
     contracts = relationship('Contracts', backref='plans')

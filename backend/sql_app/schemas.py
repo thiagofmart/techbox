@@ -124,12 +124,12 @@ class PlanUpdate(PlanBase):
     t_value: Optional[str]
     s_value: Optional[str]
     y_value: Optional[str]
-class PlanDelete(BaseModel):
-    id: int
+    status: Optional[bool]
 
 class Plan(PlanBase):
     id: int
     created_at: datetime
+    status: bool
     class Config:
         orm_mode=True
 

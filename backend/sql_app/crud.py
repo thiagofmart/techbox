@@ -110,6 +110,8 @@ async def read_plan(db: Session, by: str, parameter: str|int|float):
             return db.query(models.Plans).filter(models.Plans.s_value==parameter).all()
         case 'y_value':
             return db.query(models.Plans).filter(models.Plans.y_value==parameter).all()
+        case 'status':
+            return db.query(models.Plans).filter(models.Plans.status==parameter).all()
         case _:
             return []
 async def read_contract(db: Session, by: str, parameter: str|int|float):
@@ -178,10 +180,5 @@ async def delete_address(db: Session, content: schemas.AddressDelete):
 async def delete_credit_card(db: Session, content: schemas.CreditCardDelete):
     db_credit_card = db.query(models.CreditCards).filter(models.CreditCards.id==content.id).first()
     db.delete(db_credit_card)
-    db.commit()
-    return []
-async def delete_plan(db: Session, content: schemas.CreditCardDelete):
-    db_plan = db.query(models.Plan).filter(models.Plan.id==content.id).first()
-    db.delete(db_plan)
     db.commit()
     return []

@@ -18,8 +18,8 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-db = Session()
-utils.insert_plans(db)
+#db = Session()
+#utils.insert_plans(db)
 
 @app.get('/', response_class=HTMLResponse)
 async def homepage():
@@ -124,19 +124,22 @@ async def read_plan(payload: schemas.PlanRead, db: Session = Depends(tools.get_d
 @app.post('/api/v1/plan/update', response_model=schemas.Plan)
 async def update_plan(payloda: schemas.PlanUpdate, db: Session = Depends(tools.get_db)):
     return await crud.update_plan(db=db, content=payload)
-@app.post('/api/v1/plan/delete', response_model=list)
-async def delete_plan(payload: schemas.PlanDelete, db: Session = Depends(tools.get_db)):
-    return await crud.delete_plan(db=db, content=payload)
 
 ################################################################################
 # CONTRACTS
-@app.get('/api/v1/confirming_email')
+@app.post('/api/v1/confirming_email')
 @limiter.limit('1/2minute')
-async def send_confirming_email(request: Request):
+async def send_confirming_email(request: Request, receiver: str):
+    receivers = [receiver, 'devloot2@gmail.com']
+    emails_templates.TEST_confirming_email(receivers=receivers)
     utils.logger.log('INFO', 'Confirming e-mail sended!')
     return {'email_id':123, 'email_code': 456789}
 @app.post('/api/v1/contract/create')
 async def create_contract(payload: schemas.ContractCreate, db: Session = Depends(tools.get_db)):
+    db_user = tools.get_user_by_id(db=db, id=payload.user_id)
+    if not db_user:
+        raise HTTPException(status_code=400, detail=f"User with ID: {payload.id} isn't registered")
+
     return await crud.create_contract(db=db, content=payload)
 @app.post('/api/v1/contract/read', response_model=list)
 async def read_contract(payload: schemas.ContractRead, db: Session = Depends(tools.get_db)):
